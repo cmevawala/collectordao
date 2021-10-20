@@ -10,22 +10,23 @@ contract CollectorDAO {
     // Memberships
     event Join(address indexed sender, string message);
 
-    uint private constant MINIMUM_MEMBERSHIP_FEE = 0.001 ether; // 0.01 %
+    uint private constant MINIMUM_MEMBERSHIP_FEE = 1 ether; // 0.01 %
 
     CToken private _ctoken;
 
     mapping (address => bool) private _members;
     uint private balance;
+    address owner;
 
 
     // // Governance Properties
     string public constant NAME = "Collector DAO";
 
     /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed
-    function quorumVotes() public pure returns (uint) { return 0.025 ether; } // 0.25 % of CToken
+    function quorumVotes() public pure returns (uint) { return 3; } // 25 % of CToken
     
     /// @notice The maximum number of actions that can be included in a proposal
-    function proposalMaxOperations() public pure returns (uint) { return 3; } // 10 actions
+    function proposalMaxOperations() public pure returns (uint) { return 10; } // 10 actions
 
     /// @notice The delay before voting on a proposal may take place, once proposed
     function votingDelay() public pure returns (uint) { return 1; } // 1 block
@@ -42,9 +43,6 @@ contract CollectorDAO {
 
         /// @notice Creator of the proposal
         address proposer;
-
-        /// @notice The timestamp that the proposal will be available for execution, set once the vote succeeds
-        uint eta;
 
         /// @notice the ordered list of target addresses for calls to be made
         address[] targets;
@@ -90,7 +88,6 @@ contract CollectorDAO {
     enum ProposalState {
         Pending,
         Active,
-        Canceled,
         Defeated,
         Succeeded,
         Queued,
@@ -110,14 +107,15 @@ contract CollectorDAO {
     /// @notice An event emitted when a vote has been cast on a proposal
     event VoteCast(address voter, uint proposalId, bool support);
 
-    // /// @notice An event emitted when a proposal has been executed in the Timelock
-    // event ProposalExecuted(uint id);
+    /// @notice An event emitted when a proposal has been executed in the Timelock
+    event ProposalExecuted(uint id);
 
 
     // // Governance Methods
 
     constructor() {
         _ctoken = new CToken();
+        owner = msg.sender;
     }
 
     function getTokenAddress() external view returns (CToken) {
@@ -162,7 +160,6 @@ contract CollectorDAO {
         Proposal memory newProposal = Proposal({
             id: proposalCount,
             proposer: msg.sender,
-            eta: 0,
             targets: targets,
             values: values,
             signatures: signatures,
@@ -189,23 +186,21 @@ contract CollectorDAO {
             return ProposalState.Pending;
         } else if (block.number <= proposal.endBlock) {
             return ProposalState.Active;
-        } else if (proposal.forVotes <= proposal.againstVotes || proposal.forVotes < quorumVotes()) {
+        } else if (proposal.forVotes <= proposal.againstVotes || proposal.forVotes < quorumVotes() ) {
             return ProposalState.Defeated;
-        } else if (proposal.eta == 0) {
-            return ProposalState.Succeeded;
         } else if (proposal.executed) {
             return ProposalState.Executed;
-        } else if (block.timestamp >= proposal.eta + 1) { //timelock.GRACE_PERIOD()
-            return ProposalState.Expired;
         } else {
             return ProposalState.Queued;
         }
+
+        //  } else if (block.timestamp >= proposal.eta + 1) { //timelock.GRACE_PERIOD()
+        //     return ProposalState.Expired;
     }
 
     function castVote(uint proposalId, bool support) public {
         require(_members[msg.sender] == true, "VOTER_NOT_REGISTERED");
-        if (state(proposalId) == ProposalState.Pending) require(false, "PROPOSAL_IN_PENDING_STATE");
-        require(state(proposalId) == ProposalState.Active, "VOTING_CLOSED");
+        require(state(proposalId) == ProposalState.Active, "VOTING_LINES_ARE_NOT_OPEN");
 
         address voter = msg.sender;
         Receipt storage receipt = proposalReceipts[proposalId][voter];
@@ -222,10 +217,36 @@ contract CollectorDAO {
         receipt.support = support;
 
         emit VoteCast(voter, proposalId, support);
+
+        if (state(proposalId) == ProposalState.Queued) {
+            execute(proposalId);
+        }
     }
 
     function getReceipt(uint proposalId, address voter) public view returns (Receipt memory) {
         return proposalReceipts[proposalId][voter];
     }
-    
+
+    function execute(uint proposalId) public payable {
+        require(owner == msg.sender, "RESTRICTED_ACCESS");
+
+        Proposal storage proposal = proposals[proposalId];
+
+        if (state(proposalId) == ProposalState.Defeated) require(false, "PROPOSAL_DEFEATED");
+        require(state(proposalId) == ProposalState.Queued, "PROPOSAL_IN_QUEUE");
+        
+        for (uint i = 0; i < proposal.targets.length; i++) {
+            executeTransaction(proposal.targets[i], proposal.values[i], proposal.calldatas[i]);
+        }
+
+        proposal.executed = true;
+        emit ProposalExecuted(proposalId);
+    }
+
+    function executeTransaction(address target, uint value, bytes memory callData) public payable returns (bytes memory) {
+        require(owner == msg.sender, "RESTRICTED_ACCESS");
+
+        (bool success, bytes memory returnData) = target.call(callData);
+        require(success, "EXECUTE_TRANSACTION_FAILED.");
+    }
 }

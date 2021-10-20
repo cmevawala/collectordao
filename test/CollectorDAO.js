@@ -5,8 +5,16 @@ const {
   parseEther,
   hexValue,
   formatUnits,
+  keccak256,
+  toUtf8Bytes,
+  formatBytes32String,
+  parseBytes32String,
+  arrayify,
+  hexlify,
+  Interface,
 } = require("ethers/lib/utils");
 const { BigNumber } = require("ethers");
+const RareNFTJSON = require("../artifacts/contracts/RareNFT.sol/RareNFT.json");
 
 describe("CollectorDAO", function () {
   let CollectorDAOContract;
@@ -15,12 +23,12 @@ describe("CollectorDAO", function () {
   let cToken;
   let RareNFTContract;
   let rareNFT;
-  let owner, m1, m2;
+  let owner, m1, m2, m3, m4, m5;
   let overrides;
 
   beforeEach(async function () {
     // Get the ContractFactory and Signers here.
-    [owner, m1, m2] = await ethers.getSigners();
+    [owner, m1, m2, m3, m4, m5] = await ethers.getSigners();
 
     CollectorDAOContract = await ethers.getContractFactory("CollectorDAO");
     collectorDAO = await CollectorDAOContract.deploy();
@@ -53,7 +61,7 @@ describe("CollectorDAO", function () {
     let calldatas;
 
     beforeEach(async function () {
-      overrides = { value: parseEther("0.001") };
+      overrides = { value: parseEther("1") };
       await collectorDAO.connect(m1).join(overrides);
 
       targets = [rareNFT.address];
@@ -141,7 +149,7 @@ describe("CollectorDAO", function () {
     let latestProposalId;
 
     beforeEach(async function () {
-      overrides = { value: parseEther("0.001") };
+      overrides = { value: parseEther("1") };
       await collectorDAO.connect(m1).join(overrides);
 
       targets = [rareNFT.address];
@@ -163,33 +171,7 @@ describe("CollectorDAO", function () {
       latestProposalId = await collectorDAO.latestProposalIds(m1.address);
     });
 
-    it("should fail with proposal in pending state", async function () {
-      await expect(
-        collectorDAO.connect(m1).castVote(latestProposalId, false)
-      ).to.be.revertedWith("PROPOSAL_IN_PENDING_STATE");
-    });
-
     it("should allow the member to caste the vote", async function () {
-      //   overrides = { value: parseEther("0.001") };
-      //   await collectorDAO.connect(m1).join(overrides);
-
-      //   targets = [rareNFT.address];
-      //   values = [];
-      //   signatures = ["5328920c"];
-      //   calldatas = [collectorDAO.address];
-
-      //   await collectorDAO
-      //     .connect(m1)
-      //     .propose(
-      //       targets,
-      //       values,
-      //       signatures,
-      //       calldatas,
-      //       "Proposal 1 Created",
-      //       overrides
-      //     );
-
-      //   const latestProposalId = await collectorDAO.latestProposalIds(m1.address);
       expect(latestProposalId.toBigInt()).to.equal(BigNumber.from("1"));
 
       // Set the time to be a specific amount
@@ -208,13 +190,6 @@ describe("CollectorDAO", function () {
       expect(receipt.support).to.equal(false);
     });
 
-    // it("should fail when voting line is closed for a proposal", async function () {
-    //   // Set the time to be a specific amount
-
-    //   await expect(
-    //     collectorDAO.connect(m1).castVote(latestProposalId, false)
-    //   ).to.be.revertedWith("VOTING_CLOSED");
-    // });
     it("should fail when voter has already voted for a proposal", async function () {
       // Set the time to be a specific amount
       await ethers.provider.send("evm_setNextBlockTimestamp", [
@@ -227,6 +202,130 @@ describe("CollectorDAO", function () {
       await expect(
         collectorDAO.connect(m1).castVote(latestProposalId, false)
       ).to.be.revertedWith("ALREADY_VOTED");
+
+      // console.log(keccak256(toUtf8Bytes("mint(address)")));
+    });
+
+    // it("should fail when voting line is closed for a proposal", async function () {
+    //   // Set the time to be a specific amount
+    //   await ethers.provider.send("evm_setNextBlockTimestamp", [
+    //     new Date().getTime() + 259200,
+    //   ]);
+    //   await ethers.provider.send("evm_mine");
+    //   let i = 17500;
+    //   while (i > 0) {
+    //     await ethers.provider.send("evm_mine");
+    //     i--;
+    //   }
+    //   // Set the time to be a specific amount
+    //   await expect(
+    //     collectorDAO.connect(m1).castVote(latestProposalId, false)
+    //   ).to.be.revertedWith("VOTING_LINE_CLOSED");
+    // });
+  });
+
+  describe("CollectorDAO - Execute Proposal", function () {
+    let targets;
+    let values;
+    let signatures;
+    let calldatas;
+    let latestProposalId;
+    let interface;
+
+    beforeEach(async function () {
+      interface = new Interface(RareNFTJSON.abi);
+
+      overrides = { value: parseEther("1") };
+      await collectorDAO.connect(m1).join(overrides);
+      await collectorDAO.connect(m2).join(overrides);
+      await collectorDAO.connect(m3).join(overrides);
+      await collectorDAO.connect(m4).join(overrides);
+      await collectorDAO.connect(m5).join(overrides);
+
+      targets = [rareNFT.address];
+      values = [10];
+      signatures = ["-"];
+      calldatas = [
+        interface.encodeFunctionData("mint", [collectorDAO.address]),
+      ];
+
+      // signatures = ["mint(address)"];
+      // calldatas = [hexlify(collectorDAO.address)];
+
+      // 0x6a627842
+      // 00000000000000000000000068b1d87f95878fe05b998f19b66f4baba5de1aed
+      // 00000000000000000000000068b1d87f95878fe05b998f19b66f4baba5de1aed
+
+      await collectorDAO
+        .connect(m1)
+        .propose(
+          targets,
+          values,
+          signatures,
+          calldatas,
+          "Proposal 1 Created",
+          overrides
+        );
+
+      latestProposalId = await collectorDAO.latestProposalIds(m1.address);
+    });
+
+    it("should should execute the proprosal when proposal got enough votes", async function () {
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 30,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      await collectorDAO.connect(m1).castVote(latestProposalId, true);
+      await collectorDAO.connect(m2).castVote(latestProposalId, true);
+      await collectorDAO.connect(m3).castVote(latestProposalId, true);
+
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 259200,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      let i = 17500;
+      while (i > 0) {
+        await ethers.provider.send("evm_mine");
+        i--;
+      }
+
+      await collectorDAO.execute(latestProposalId);
+
+      expect(
+        formatUnits(await rareNFT.balanceOf(collectorDAO.address))
+      ).to.equal("0.000000000000000001");
+    });
+
+    it("should should not execute the proprosal when proposal has not enough votes", async function () {
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 300000,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      await collectorDAO.connect(m1).castVote(latestProposalId, true);
+      await collectorDAO.connect(m2).castVote(latestProposalId, true);
+      await collectorDAO.connect(m3).castVote(latestProposalId, false);
+
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 750000,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      let i = 17500;
+      while (i > 0) {
+        await ethers.provider.send("evm_mine");
+        i--;
+      }
+
+      await expect(collectorDAO.execute(latestProposalId)).to.be.revertedWith(
+        "PROPOSAL_DEFEATED"
+      );
     });
   });
 });
