@@ -72,8 +72,8 @@
       ]
     },
     "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/contracts/CollectorDAO.sol": {
-      "lastModificationDate": 1634627066790,
-      "contentHash": "c9fc18f9b3f42e40ec2cb485c7971f68",
+      "lastModificationDate": 1634664642642,
+      "contentHash": "ebb3f078ed286048086b05cb24f12491",
       "sourceName": "contracts/CollectorDAO.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -98,6 +98,7 @@
         }
       },
       "imports": [
+        "hardhat/console.sol",
         "./CToken.sol"
       ],
       "versionPragmas": [
@@ -250,8 +251,8 @@
       ]
     },
     "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/contracts/CToken.sol": {
-      "lastModificationDate": 1634624130457,
-      "contentHash": "583c9aedd5300a7d13527ff7a9b95b8e",
+      "lastModificationDate": 1634636759340,
+      "contentHash": "07dee594e494810e5335f841c67fce6f",
       "sourceName": "contracts/CToken.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -284,6 +285,363 @@
       ],
       "artifacts": [
         "CToken"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol": {
+      "lastModificationDate": 1634620852819,
+      "contentHash": "a4f6dccf3f15b6844e357f737a572388",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol",
+        "./IERC721Receiver.sol",
+        "./extensions/IERC721Metadata.sol",
+        "../../utils/Address.sol",
+        "../../utils/Context.sol",
+        "../../utils/Strings.sol",
+        "../../utils/introspection/ERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol": {
+      "lastModificationDate": 1634620852828,
+      "contentHash": "53919d6975f2c0f3dffee5e3a1064116",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol": {
+      "lastModificationDate": 1634620852829,
+      "contentHash": "9a367cecca6fed80a3e975b7e6b3bd5c",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Receiver"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "lastModificationDate": 1634620852829,
+      "contentHash": "8aa69ca8424167555baaaa9f607801db",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/utils/Address.sol": {
+      "lastModificationDate": 1634620852812,
+      "contentHash": "c5f6c4e4df069c789e7d84b4c3011913",
+      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1634620852835,
+      "contentHash": "62142442bed149f965c5ed971fae4182",
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Strings"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol": {
+      "lastModificationDate": 1634620852816,
+      "contentHash": "a9a5319dff9088c6ffe757ea1c2a6729",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC165"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1634620852826,
+      "contentHash": "9a04322bb8f6b8f2767d8358d1d2537b",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/contracts/RareNFT.sol": {
+      "lastModificationDate": 1634644739500,
+      "contentHash": "f0546e310d1b79c2a4b582027af386f3",
+      "sourceName": "contracts/RareNFT.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/utils/Counters.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "RareNFT"
+      ]
+    },
+    "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/node_modules/@openzeppelin/contracts/utils/Counters.sol": {
+      "lastModificationDate": 1634620852813,
+      "contentHash": "b7811964d33f23b2d45ed3ebb76a4548",
+      "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Counters"
       ]
     }
   }
