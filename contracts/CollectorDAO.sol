@@ -218,9 +218,9 @@ contract CollectorDAO {
 
         emit VoteCast(voter, proposalId, support);
 
-        if (state(proposalId) == ProposalState.Queued) {
-            execute(proposalId);
-        }
+        // if (state(proposalId) == ProposalState.Queued) {
+        //     execute(proposalId);
+        // }
     }
 
     function getReceipt(uint proposalId, address voter) public view returns (Receipt memory) {
