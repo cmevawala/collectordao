@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/contracts/CollectorDAO.sol": {
-      "lastModificationDate": 1634737479655,
-      "contentHash": "6473756d7e0ca582a40464a466037d41",
+      "lastModificationDate": 1634816284310,
+      "contentHash": "48c272709c60c715fe5bbe45b246085c",
       "sourceName": "contracts/CollectorDAO.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -73,8 +73,8 @@
       ]
     },
     "/Users/Chitrang.Mevawala/Documents/optilistic/collectordao/contracts/CToken.sol": {
-      "lastModificationDate": 1634636759340,
-      "contentHash": "07dee594e494810e5335f841c67fce6f",
+      "lastModificationDate": 1634811252287,
+      "contentHash": "bb4197de375d1ebf3f685f96dc3ac0f9",
       "sourceName": "contracts/CToken.sol",
       "solcConfig": {
         "version": "0.8.7",

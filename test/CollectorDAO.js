@@ -13,7 +13,7 @@ const {
   hexlify,
   Interface,
 } = require("ethers/lib/utils");
-const { BigNumber } = require("ethers");
+const { BigNumber, utils } = require("ethers");
 const RareNFTJSON = require("../artifacts/contracts/RareNFT.sol/RareNFT.json");
 
 describe("CollectorDAO", function () {
@@ -172,22 +172,20 @@ describe("CollectorDAO", function () {
     });
 
     it("should allow the member to caste the vote", async function () {
-      expect(latestProposalId.toBigInt()).to.equal(BigNumber.from("1"));
-
       // Set the time to be a specific amount
       await ethers.provider.send("evm_setNextBlockTimestamp", [
         new Date().getTime() + 30,
       ]);
       await ethers.provider.send("evm_mine");
 
-      await collectorDAO.connect(m1).castVote(latestProposalId, false);
+      await collectorDAO.connect(m1).castVote(latestProposalId, true);
 
       const receipt = await collectorDAO.getReceipt(
         latestProposalId,
         m1.address
       );
       expect(receipt.hasVoted).to.equal(true);
-      expect(receipt.support).to.equal(false);
+      expect(receipt.support).to.equal(true);
     });
 
     it("should fail when voter has already voted for a proposal", async function () {
@@ -206,22 +204,128 @@ describe("CollectorDAO", function () {
       // console.log(keccak256(toUtf8Bytes("mint(address)")));
     });
 
+    it("should not allow the user to vote if voter has not enough balance", async function () {
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 30,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      await cToken.burn(m1.address, utils.parseUnits("1"));
+
+      await expect(
+        collectorDAO.connect(m1).castVote(latestProposalId, false)
+      ).to.be.revertedWith("NOT_HAVING_ENOUGH_VOTING_BALANCE");
+    });
+
     // it("should fail when voting line is closed for a proposal", async function () {
     //   // Set the time to be a specific amount
     //   await ethers.provider.send("evm_setNextBlockTimestamp", [
     //     new Date().getTime() + 259200,
     //   ]);
     //   await ethers.provider.send("evm_mine");
+
     //   let i = 17500;
     //   while (i > 0) {
     //     await ethers.provider.send("evm_mine");
     //     i--;
     //   }
+
     //   // Set the time to be a specific amount
     //   await expect(
     //     collectorDAO.connect(m1).castVote(latestProposalId, false)
-    //   ).to.be.revertedWith("VOTING_LINE_CLOSED");
+    //   ).to.be.revertedWith("VOTING_LINES_ARE_NOT_OPEN");
     // });
+  });
+
+  describe("CollectorDAO - Delegate Vote", function () {
+    let targets;
+    let values;
+    let signatures;
+    let calldatas;
+    let latestProposalId;
+
+    beforeEach(async function () {
+      overrides = { value: parseEther("1") };
+      await collectorDAO.connect(m1).join(overrides);
+
+      targets = [rareNFT.address];
+      values = [];
+      signatures = ["5328920c"];
+      calldatas = [collectorDAO.address];
+
+      await collectorDAO
+        .connect(m1)
+        .propose(
+          targets,
+          values,
+          signatures,
+          calldatas,
+          "Proposal 1 Created",
+          overrides
+        );
+
+      latestProposalId = await collectorDAO.latestProposalIds(m1.address);
+    });
+
+    it("should allow the member to delegate the vote", async function () {
+      overrides = { value: parseEther("1") };
+      await collectorDAO.connect(m2).join(overrides);
+      await collectorDAO.connect(m3).join(overrides);
+
+      expect(formatEther(await cToken.getVotingBalance(m2.address))).to.equal(
+        "1.0"
+      );
+      expect(formatEther(await cToken.getVotingBalance(m3.address))).to.equal(
+        "1.0"
+      );
+
+      await cToken.connect(m2).delegate(m3.address);
+
+      expect(formatEther(await cToken.getVotingBalance(m2.address))).to.equal(
+        "0.0"
+      );
+      expect(formatEther(await cToken.getVotingBalance(m3.address))).to.equal(
+        "2.0"
+      );
+    });
+
+    it("should not allow the delegator to vote on the proposal once the voting power has been delegated", async function () {
+      overrides = { value: parseEther("1") };
+      await collectorDAO.connect(m2).join(overrides);
+      await collectorDAO.connect(m3).join(overrides);
+
+      await cToken.connect(m2).delegate(m3.address);
+
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 30,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      await expect(
+        collectorDAO.connect(m2).castVote(latestProposalId, false)
+      ).to.be.revertedWith("NOT_HAVING_ENOUGH_VOTING_BALANCE");
+    });
+
+    it("should allow the delegatee to vote on behalf of delegator", async function () {
+      overrides = { value: parseEther("1") };
+      await collectorDAO.connect(m2).join(overrides);
+      await collectorDAO.connect(m3).join(overrides);
+
+      await cToken.connect(m2).delegate(m3.address);
+
+      // Set the time to be a specific amount
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        new Date().getTime() + 30,
+      ]);
+      await ethers.provider.send("evm_mine");
+
+      await collectorDAO.connect(m3).castVote(latestProposalId, true);
+
+      const proposal = await collectorDAO.proposals(latestProposalId);
+      expect(proposal.forVotes).to.equal(BigNumber.from("2"));
+    });
   });
 
   describe("CollectorDAO - Execute Proposal", function () {
@@ -270,7 +374,7 @@ describe("CollectorDAO", function () {
       latestProposalId = await collectorDAO.latestProposalIds(m1.address);
     });
 
-    it("should should execute the proprosal when proposal got enough votes", async function () {
+    it("should execute the proprosal when proposal got enough votes", async function () {
       // Set the time to be a specific amount
       await ethers.provider.send("evm_setNextBlockTimestamp", [
         new Date().getTime() + 30,
@@ -300,7 +404,7 @@ describe("CollectorDAO", function () {
       ).to.equal("0.000000000000000001");
     });
 
-    it("should should not execute the proprosal when proposal has not enough votes", async function () {
+    it("should not execute the proprosal when proposal has not enough votes", async function () {
       // Set the time to be a specific amount
       await ethers.provider.send("evm_setNextBlockTimestamp", [
         new Date().getTime() + 300000,

@@ -112,7 +112,6 @@ contract CollectorDAO {
 
 
     // // Governance Methods
-
     constructor() {
         _ctoken = new CToken();
         owner = msg.sender;
@@ -193,9 +192,6 @@ contract CollectorDAO {
         } else {
             return ProposalState.Queued;
         }
-
-        //  } else if (block.timestamp >= proposal.eta + 1) { //timelock.GRACE_PERIOD()
-        //     return ProposalState.Expired;
     }
 
     function castVote(uint proposalId, bool support) public {
@@ -205,12 +201,15 @@ contract CollectorDAO {
         address voter = msg.sender;
         Receipt storage receipt = proposalReceipts[proposalId][voter];
         require(receipt.hasVoted == false, "ALREADY_VOTED");
+
+        uint votes = _ctoken.getVotingBalance(voter) / 10 ** 18;
+        require(votes > 0, "NOT_HAVING_ENOUGH_VOTING_BALANCE");
         
         Proposal storage proposal = proposals[proposalId];
         if (support) {
-            proposal.forVotes = proposal.forVotes + 1;
+            proposal.forVotes = proposal.forVotes + votes;
         } else {
-            proposal.againstVotes = proposal.againstVotes + 1;
+            proposal.againstVotes = proposal.againstVotes + votes;
         }
 
         receipt.hasVoted = true;
