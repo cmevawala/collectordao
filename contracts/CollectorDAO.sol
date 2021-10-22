@@ -10,17 +10,22 @@ contract CollectorDAO {
     // Memberships
     event Join(address indexed sender, string message);
 
-    uint private constant MINIMUM_MEMBERSHIP_FEE = 1 ether; // 0.01 %
+    string public constant NAME = "Collector DAO";
 
+    /// @notice The minimum fee that member has to pay at the time of joining DAO.
+    uint private constant MINIMUM_MEMBERSHIP_FEE = 1 ether;
+
+    /// @notice Addess of CToken
     CToken private _ctoken;
 
+    /// @notice List of DAO members
     mapping (address => bool) private _members;
-    uint private balance;
+
+    /// @notice Total ETH owned by the DAO
+    uint public balance;
+
+    /// @notice Owner of the DAO
     address owner;
-
-
-    // // Governance Properties
-    string public constant NAME = "Collector DAO";
 
     /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed
     function quorumVotes() public pure returns (uint) { return 3; } // 25 % of CToken
@@ -242,10 +247,10 @@ contract CollectorDAO {
         emit ProposalExecuted(proposalId);
     }
 
-    function executeTransaction(address target, uint value, bytes memory callData) public payable returns (bytes memory) {
+    function executeTransaction(address target, uint msgvalue, bytes memory callData) public payable returns (bytes memory) {
         require(owner == msg.sender, "RESTRICTED_ACCESS");
 
-        (bool success, bytes memory returnData) = target.call(callData);
+        (bool success, bytes memory returnData) = target.call{value: msgvalue}(callData); //{value: msgvalue}
         require(success, "EXECUTE_TRANSACTION_FAILED.");
     }
 }

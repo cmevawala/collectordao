@@ -12,6 +12,7 @@ const {
   arrayify,
   hexlify,
   Interface,
+  parseUnits,
 } = require("ethers/lib/utils");
 const { BigNumber, utils } = require("ethers");
 const RareNFTJSON = require("../artifacts/contracts/RareNFT.sol/RareNFT.json");
@@ -347,7 +348,7 @@ describe("CollectorDAO", function () {
       await collectorDAO.connect(m5).join(overrides);
 
       targets = [rareNFT.address];
-      values = [10];
+      values = [parseUnits("1")];
       signatures = ["-"];
       calldatas = [
         interface.encodeFunctionData("mint", [collectorDAO.address]),
@@ -402,6 +403,10 @@ describe("CollectorDAO", function () {
       expect(
         formatUnits(await rareNFT.balanceOf(collectorDAO.address))
       ).to.equal("0.000000000000000001");
+
+      expect(
+        formatUnits(await ethers.provider.getBalance(collectorDAO.address))
+      ).to.equal("5.0");
     });
 
     it("should not execute the proprosal when proposal has not enough votes", async function () {

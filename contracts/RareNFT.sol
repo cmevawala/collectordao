@@ -12,7 +12,7 @@ contract RareNFT is ERC721 {
 
     constructor() ERC721("RareNFT", "RARE") {}
 
-    function mint(address to) public returns (uint256) {
+    function mint(address to) payable public returns (uint256) {
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
