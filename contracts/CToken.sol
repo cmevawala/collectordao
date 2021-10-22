@@ -17,7 +17,13 @@ contract CToken is ERC20 {
     mapping (address => uint256) public votingBalance;
 
     constructor() ERC20("Collector Token", "CTR") {
-        _mint(msg.sender, 10 * (10 ** decimals()));
+        mint(10 * (10 ** decimals()));
+    }
+
+    function mint(uint amount) private returns (bool) {
+        // _mint(msg.sender, 10 * (10 ** decimals()));
+        _mint(msg.sender, amount);
+        return true;
     }
 
     function transfer(address recipient, uint amount) public override returns (bool) {
